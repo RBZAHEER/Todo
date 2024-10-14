@@ -3,6 +3,7 @@ import { User } from "../model/user.model.js"; // Correct the import path for Us
 
 export const authenticate = async (req, res, next) => {
   const token = req.cookies.jwt;
+  // console.log("Token received:", token);
   if (!token) {
     return res
       .status(401)
@@ -10,13 +11,31 @@ export const authenticate = async (req, res, next) => {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_TOKEN);
+    // console.log("Token decoded:", decoded);
     const user = await User.findById(decoded.userId);
     if (!user) {
       return res.status(401).json({ message: "Unauthorized. User not found." });
     }
-    req.user = user; // Attach user data to the request object
-    next(); // Proceed to the next middleware or route handler
+    req.user = user;
+    next();
   } catch (error) {
-    return res.status(401).json({ error: "Invalid token." });
+    console.error("Authentication Error:", error.message);
+    return res.status(401).json({ message: "Invalid token." });
   }
 };
+
+// import jwt from "jsonwebtoken";
+// import { User } from "../model/user.model.js";
+// export const authenticate = async (req, res, next) => {
+//   const token = req.cookies.jwt;
+//   if (!token) {
+//     return res.status(401).json({ message: "Unauthorized" });
+//   }
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET_TOKEN);
+//     req.user = await User.findById(decoded.userId);
+//   } catch (error) {
+//     return res.status(401).json({ message: "" + error.message });
+//   }
+//   next();
+// };
